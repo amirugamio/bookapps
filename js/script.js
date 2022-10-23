@@ -64,7 +64,9 @@ function makeBook(bookObject) {
     const trashButton = document.createElement("button");
     trashButton.classList.add("trash-button");
     trashButton.addEventListener("click", function () {
-      removeJudulFromCompleted(id);
+      if (confirm("Apakah anda yakin ingin menghapus ini ?")) {
+        removeJudulFromCompleted(id);
+      }
     });
 
     container.append(undoButton, trashButton);
