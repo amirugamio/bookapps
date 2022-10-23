@@ -1,26 +1,16 @@
-/**
- * [
- *    {
- *      id: <int>
- *      judul: <string>
- *      penulis: <string>
- *      isCompleted: <boolean>
- *    }
- * ]
- */
-
 const books = [];
 const RENDER_EVENT = "render-book";
 
 function generateId() {
-  return;
+  return +new Date();
 }
 
-function generateBookObject(id, judul, penulis, isCompleted) {
+function generateBookObject(id, judul, penulis, terbit, isCompleted) {
   return {
     id,
     judul,
     penulis,
+    terbit,
     isCompleted,
   };
 }
@@ -44,7 +34,7 @@ function findBookIndex(bookid) {
 }
 
 function makeBook(bookObject) {
-  const { id, judul, penulis, isCompleted } = bookObject;
+  const { id, judul, penulis, terbit, isCompleted } = bookObject;
 
   const textTitle = document.createElement("h2");
   textTitle.innerText = judul;
@@ -52,9 +42,12 @@ function makeBook(bookObject) {
   const textAuthor = document.createElement("h4");
   textAuthor.innerText = penulis;
 
+  const textTerbit = document.createElement("p");
+  textTerbit.innerText = "Tanggal Terbit : " + terbit;
+
   const textContainer = document.createElement("div");
   textContainer.classList.add("inner");
-  textContainer.append(textTitle, textAuthor);
+  textContainer.append(textTitle, textAuthor, textTerbit);
 
   const container = document.createElement("div");
   container.classList.add("item", "shadow");
@@ -91,16 +84,16 @@ function makeBook(bookObject) {
 function addBook() {
   const textBook = document.getElementById("title").value;
   const textJudul = document.getElementById("author").value;
-
+  const terbit = document.getElementById("date").value;
   const generatedID = generateId();
-  const bookObject = generateBookObject(generatedID, textBook, textJudul, false);
+  const bookObject = generateBookObject(generatedID, textBook, textJudul, terbit, false);
   books.push(bookObject);
 
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
 
-function addJudulToCompleted(bookid /* HTMLELement */) {
+function addJudulToCompleted(bookid) {
   const bookTarget = findBook(bookid);
   if (bookTarget == null) return;
 
@@ -109,7 +102,7 @@ function addJudulToCompleted(bookid /* HTMLELement */) {
   saveData();
 }
 
-function removeJudulFromCompleted(bookid /* HTMLELement */) {
+function removeJudulFromCompleted(bookid) {
   const bookTarget = findBookIndex(bookid);
   if (bookTarget === -1) return;
   books.splice(bookTarget, 1);
@@ -118,7 +111,7 @@ function removeJudulFromCompleted(bookid /* HTMLELement */) {
   saveData();
 }
 
-function undoJudulFromCompleted(bookid /* HTMLELement */) {
+function undoJudulFromCompleted(bookid) {
   const bookTarget = findBook(bookid);
   if (bookTarget == null) return;
 
@@ -128,11 +121,15 @@ function undoJudulFromCompleted(bookid /* HTMLELement */) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const simpanForm /* HTMLFormElement */ = document.getElementById("form");
+  const simpanForm = document.getElementById("form");
 
   simpanForm.addEventListener("submit", function (event) {
     event.preventDefault();
     addBook();
+    alert("Data buku berhasil sudah ditambahkan");
+    document.getElementById("title").value = "";
+    document.getElementById("author").value = "";
+    document.getElementById("date").value = "";
   });
 });
 
@@ -140,7 +137,6 @@ document.addEventListener(RENDER_EVENT, function () {
   const uncompletedBOOKList = document.getElementById("books");
   const listCompleted = document.getElementById("completed-books");
 
-  // clearing list item
   uncompletedBOOKList.innerHTML = "";
   listCompleted.innerHTML = "";
 
@@ -165,7 +161,7 @@ function saveData() {
 const SAVED_EVENT = "saved-book";
 const STORAGE_KEY = "BOOK_APPS";
 
-function isStorageExist() /* boolean */ {
+function isStorageExist() {
   if (typeof Storage === undefined) {
     alert("Browser kamu tidak mendukung local storage");
     return false;
